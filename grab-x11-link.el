@@ -31,41 +31,80 @@
 
 (require 'subr-x)
 
+(declare-function org-make-link-string "org" (link &optional description))
+
+(defun grab-x11-link--shell-command-to-string (command)
+  (string-trim
+   (shell-command-to-string command)))
+
 (defun grab-x11-link-firefox ()
-  (interactive)
   (let ((emacs-window
-         (string-trim
-          (shell-command-to-string
-           "xdotool getactivewindow")))
+         (grab-x11-link--shell-command-to-string
+          "xdotool getactivewindow"))
         (firefox-window
-         (string-trim
-          (shell-command-to-string
-           "xdotool search --classname Navigator"))))
+         (grab-x11-link--shell-command-to-string
+          "xdotool search --classname Navigator")))
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" firefox-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
-    (insert (x-get-clipboard))))
+    (let ((url (substring-no-properties (x-get-clipboard)))
+          (title (grab-x11-link--shell-command-to-string
+                  (concat "xdotool getwindowname " firefox-window))))
+      (cons url title))))
 
 (defun grab-x11-link-chromium ()
-  (interactive)
   (let ((emacs-window
-         (string-trim
-          (shell-command-to-string
-           "xdotool getactivewindow")))
+         (grab-x11-link--shell-command-to-string
+          "xdotool getactivewindow"))
         (chromium-window
-         (string-trim
-          (shell-command-to-string
-           "xdotool search --class chromium-browser | tail -1"))))
+         (grab-x11-link--shell-command-to-string
+          "xdotool search --class chromium-browser | tail -1")))
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" chromium-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
-    (insert (x-get-clipboard))))
+    (let ((url (substring-no-properties (x-get-clipboard)))
+          (title (grab-x11-link--shell-command-to-string
+                  (concat "xdotool getwindowname " chromium-window))))
+      (cons url title))))
 
-;; TODO: To get window name, use
-;; xdotool getwindowname $( xdotool search --class chromium-browser | tail -1)
+(defun grab-x11-link--build (url-title &optional type)
+  "Build plain or markdown or org link."
+  (let ((url (car url-title))
+        (title (cdr url-title)))
+    (cl-case type
+      ('org  (progn (require 'org)
+                    (org-make-link-string url title)))
+      ('markdown (format "[%s](%s)" title url))
+      (t url))))
+;;;###autoload
+(defun grab-x11-link-firefox-insert-link ()
+  (interactive)
+  (insert (grab-x11-link--build (grab-x11-link-firefox))))
 
-;; TODO: Make org-mode link
-;; TODO: Make markdown link
+;;;###autoload
+(defun grab-x11-link-firefox-insert-org-link ()
+  (interactive)
+  (insert (grab-x11-link--build (grab-x11-link-firefox) 'org)))
+
+;;;###autoload
+(defun grab-x11-link-firefox-insert-markdown-link ()
+  (interactive)
+  (insert (grab-x11-link--build (grab-x11-link-firefox) 'markdown)))
+
+;;;###autoload
+(defun grab-x11-link-chromium-insert-link ()
+  (interactive)
+  (insert (grab-x11-link--build (grab-x11-link-chromium))))
+
+;;;###autoload
+(defun grab-x11-link-chromium-insert-org-link ()
+  (interactive)
+  (insert (grab-x11-link--build (grab-x11-link-chromium) 'org)))
+
+;;;###autoload
+(defun grab-x11-link-chromium-insert-markdown-link ()
+  (interactive)
+  (insert (grab-x11-link--build (grab-x11-link-chromium) 'markdown)))
 
 (provide 'grab-x11-link)
 ;;; grab-x11-link.el ends here
