@@ -6,6 +6,7 @@
 ;; URL: https://github.com/xuchunyang/grab-x11-link
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: hyperlink
+;; Version: 0.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -62,6 +63,9 @@
 
 ;; TODO: To get window name, use
 ;; xdotool getwindowname $( xdotool search --class chromium-browser | tail -1)
+
+;; TODO: Make org-mode link
+;; TODO: Make markdown link
 
 (provide 'grab-x11-link)
 ;;; grab-x11-link.el ends here
