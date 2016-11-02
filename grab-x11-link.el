@@ -41,6 +41,16 @@
   (string-trim
    (shell-command-to-string command)))
 
+(defun grab-x11-link--build (url-title &optional type)
+  "Build plain or markdown or org link."
+  (let ((url (car url-title))
+        (title (cdr url-title)))
+    (cl-case type
+      ('org  (progn (require 'org)
+                    (org-make-link-string url title)))
+      ('markdown (format "[%s](%s)" title url))
+      (t url))))
+
 (defun grab-x11-link-firefox ()
   (let ((emacs-window
          (grab-x11-link--shell-command-to-string
@@ -71,15 +81,6 @@
                   (concat "xdotool getwindowname " chromium-window))))
       (cons url title))))
 
-(defun grab-x11-link--build (url-title &optional type)
-  "Build plain or markdown or org link."
-  (let ((url (car url-title))
-        (title (cdr url-title)))
-    (cl-case type
-      ('org  (progn (require 'org)
-                    (org-make-link-string url title)))
-      ('markdown (format "[%s](%s)" title url))
-      (t url))))
 ;;;###autoload
 (defun grab-x11-link-firefox-insert-link ()
   (interactive)
