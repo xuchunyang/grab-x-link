@@ -24,7 +24,11 @@
 ;;; Commentary:
 
 ;; xdotool(1) is required before using this package.
-
+;;
+;; Supported Applications:
+;; - Firefox
+;; - Chromium
+;;
 ;; By using package, your most recent clipboard will be changed.
 
 ;;; Code:
