@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'subr-x)
+(require 'cl-lib)
 
 (declare-function org-make-link-string "org" (link &optional description))
 
