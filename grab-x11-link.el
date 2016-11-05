@@ -23,13 +23,16 @@
 
 ;;; Commentary:
 
-;; xdotool(1) is required before using this package.
+;; Prerequisite:
+;; - xdotool(1) is installed
+;; - You are running a graphics Emacs
 ;;
 ;; Supported Applications:
 ;; - Firefox
 ;; - Chromium
 ;;
-;; By using package, your most recent clipboard will be changed.
+;; Notes:
+;; - By using package, your most recent clipboard will be changed.
 
 ;;; Code:
 
