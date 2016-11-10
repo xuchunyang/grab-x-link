@@ -55,6 +55,12 @@
       ('markdown (format "[%s](%s)" title url))
       (t url))))
 
+(defun grab-x11-link--title-strip (string suffix)
+  "Remove SUFFIX from STRING."
+  (if (string-suffix-p suffix string)
+      (substring string 0 (- (length suffix)))
+    string))
+
 (defun grab-x11-link-firefox ()
   (let ((emacs-window
          (grab-x11-link--shell-command-to-string
@@ -66,8 +72,10 @@
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
     (let ((url (substring-no-properties (x-get-clipboard)))
-          (title (grab-x11-link--shell-command-to-string
-                  (concat "xdotool getwindowname " firefox-window))))
+          (title (grab-x11-link--title-strip
+                  (grab-x11-link--shell-command-to-string
+                   (concat "xdotool getwindowname " firefox-window))
+                  " - Mozilla Firefox")))
       (cons url title))))
 
 (defun grab-x11-link-chromium ()
@@ -81,8 +89,10 @@
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
     (let ((url (substring-no-properties (x-get-clipboard)))
-          (title (grab-x11-link--shell-command-to-string
-                  (concat "xdotool getwindowname " chromium-window))))
+          (title (grab-x11-link--title-strip
+                  (grab-x11-link--shell-command-to-string
+                   (concat "xdotool getwindowname " chromium-window))
+                  " - Chromium")))
       (cons url title))))
 
 ;;;###autoload
