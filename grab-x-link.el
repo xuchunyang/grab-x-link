@@ -1,4 +1,4 @@
-;;; grab-x-link.el --- Grab links from some X11 apps and insert into Emacs  -*- lexical-binding: t; -*-
+;;; grab-x-link.el --- Grab links from X11 apps and insert into Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016  Chunyang Xu
 
