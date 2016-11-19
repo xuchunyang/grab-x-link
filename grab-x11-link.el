@@ -1,4 +1,4 @@
-;;; grab-x11-link.el --- Grab links from apps running in X11  -*- lexical-binding: t; -*-
+;;; grab-x11-link.el --- Grab links from some x11 apps and insert into Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016  Chunyang Xu
 
@@ -6,7 +6,7 @@
 ;; URL: https://github.com/xuchunyang/grab-x11-link
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: hyperlink
-;; Version: 0.0
+;; Version: 0.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,16 +23,17 @@
 
 ;;; Commentary:
 
+;; Grab link and title from Firefox and Chromium, insert into Emacs buffer as
+;; plain, markdown or org link.
+;;
+;; To use, invoke commands provided by this package.
+;;
 ;; Prerequisite:
-;; - xdotool(1) is installed
-;; - You are running a graphics Emacs
+;; - xdotool(1)
+;; - xsel(1) or xclip(1) if you are running Emacs inside a terminal emulator
 ;;
-;; Supported Applications:
-;; - Firefox
-;; - Chromium
-;;
-;; Notes:
-;; - By using package, your most recent clipboard will be changed.
+;; Changes:
+;; - 2016-11-19 v0.1 Support Emacs running inside terminal emulator
 
 ;;; Code:
 
@@ -61,6 +62,14 @@
       (substring string 0 (- (length suffix)))
     string))
 
+(defun grab-x11-link--get-clipboard ()
+  (if (display-graphic-p)
+      ;; NOTE: This function is obsolete since 25.1
+      (x-get-clipboard)
+    (cond ((executable-find "xsel") (grab-x11-link--shell-command-to-string "xsel --clipboard"))
+          ((executable-find "xclip") (grab-x11-link--shell-command-to-string "xclip -selection clipboard -o"))
+          (t (error "Can't get clipboard")))))
+
 (defun grab-x11-link-firefox ()
   (let ((emacs-window
          (grab-x11-link--shell-command-to-string
@@ -71,7 +80,7 @@
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" firefox-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
-    (let ((url (substring-no-properties (x-get-clipboard)))
+    (let ((url (substring-no-properties (grab-x11-link--get-clipboard)))
           (title (grab-x11-link--title-strip
                   (grab-x11-link--shell-command-to-string
                    (concat "xdotool getwindowname " firefox-window))
@@ -88,7 +97,7 @@
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" chromium-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
-    (let ((url (substring-no-properties (x-get-clipboard)))
+    (let ((url (substring-no-properties (grab-x11-link--get-clipboard)))
           (title (grab-x11-link--title-strip
                   (grab-x11-link--shell-command-to-string
                    (concat "xdotool getwindowname " chromium-window))
