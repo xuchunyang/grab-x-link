@@ -4,7 +4,7 @@
 
 ;; Author: Chunyang Xu <mail@xuchunyang.me>
 ;; URL: https://github.com/xuchunyang/grab-x11-link
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "24"))
 ;; Keywords: hyperlink
 ;; Version: 0.1
 
@@ -37,14 +37,12 @@
 
 ;;; Code:
 
-(require 'subr-x)
 (require 'cl-lib)
 
 (declare-function org-make-link-string "org" (link &optional description))
 
 (defun grab-x11-link--shell-command-to-string (command)
-  (string-trim
-   (shell-command-to-string command)))
+  (substring (shell-command-to-string command) 0 -1))
 
 (defun grab-x11-link--build (url-title &optional type)
   "Build plain or markdown or org link."
