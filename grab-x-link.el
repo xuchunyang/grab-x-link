@@ -57,9 +57,10 @@
 
 (defun grab-x-link--title-strip (string suffix)
   "Remove SUFFIX from STRING."
-  (if (string-suffix-p suffix string)
-      (substring string 0 (- (length suffix)))
-    string))
+  (cond ((< (length string) (length suffix)) string)
+        ((string= (substring string (- (length string) (length suffix))) suffix)
+         (substring string 0 (- (length suffix))))
+        (t string)))
 
 (defun grab-x-link--get-clipboard ()
   (if (display-graphic-p)
