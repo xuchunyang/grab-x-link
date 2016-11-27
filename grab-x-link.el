@@ -68,7 +68,7 @@
       (x-get-clipboard)
     (cond ((executable-find "xsel") (grab-x-link--shell-command-to-string "xsel --clipboard"))
           ((executable-find "xclip") (grab-x-link--shell-command-to-string "xclip -selection clipboard -o"))
-          (t (error "Can't get clipboard")))))
+          (t (error "Can't get clipboard because xsel or xclip is not installed")))))
 
 (defun grab-x-link-firefox ()
   (let ((emacs-window
