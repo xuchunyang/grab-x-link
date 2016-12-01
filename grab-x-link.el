@@ -6,7 +6,7 @@
 ;; URL: https://github.com/xuchunyang/grab-x-link
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 ;; Keywords: hyperlink
-;; Version: 0.3
+;; Version: 0.4
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 ;; - xsel(1) or xclip(1) if you are running Emacs inside a terminal emulator
 ;;
 ;; Changes:
+;; - 2016-12-01 v0.4 Handle case that app is not running
 ;; - 2016-12-01 v0.3 Add the command `grab-x-link'
 ;; - 2016-11-19 v0.2 Rename grab-x11-link to grab-x-link
 ;; - 2016-11-19 v0.1 Support Emacs running inside terminal emulator
@@ -44,7 +45,10 @@
 (declare-function org-make-link-string "org" (link &optional description))
 
 (defun grab-x-link--shell-command-to-string (command)
-  (substring (shell-command-to-string command) 0 -1))
+  (with-temp-buffer
+    (if (zerop (call-process-shell-command command nil t))
+        (substring (shell-command-to-string command) 0 -1)
+      nil)))
 
 (defun grab-x-link--build (url-title &optional type)
   "Build plain or markdown or org link."
@@ -76,8 +80,9 @@
          (grab-x-link--shell-command-to-string
           "xdotool getactivewindow"))
         (firefox-window
-         (grab-x-link--shell-command-to-string
-          "xdotool search --classname Navigator")))
+         (or (grab-x-link--shell-command-to-string
+              "xdotool search --classname Navigator")
+             (error "Can't detect Firfox Window -- is it running?"))))
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" firefox-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
@@ -93,8 +98,9 @@
          (grab-x-link--shell-command-to-string
           "xdotool getactivewindow"))
         (chromium-window
-         (grab-x-link--shell-command-to-string
-          "xdotool search --class chromium-browser | tail -1")))
+         (or (grab-x-link--shell-command-to-string
+              "xdotool search --class chromium-browser | tail -1")
+             (error "Can't detect Chromium Window -- is it running?"))))
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" chromium-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
     (sit-for 0.2)
