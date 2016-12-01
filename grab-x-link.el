@@ -6,7 +6,7 @@
 ;; URL: https://github.com/xuchunyang/grab-x-link
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 ;; Keywords: hyperlink
-;; Version: 0.4
+;; Version: 0.4.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,8 +46,9 @@
 
 (defun grab-x-link--shell-command-to-string (command)
   (with-temp-buffer
-    (if (zerop (call-process-shell-command command nil t))
-        (substring (shell-command-to-string command) 0 -1)
+    (if (and (zerop (call-process-shell-command command nil t))
+             (> (buffer-size) 0))
+        (substring (buffer-string) 0 -1)
       nil)))
 
 (defun grab-x-link--build (url-title &optional type)
