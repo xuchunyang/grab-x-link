@@ -127,7 +127,7 @@
           (title (grab-x-link--title-strip
                   (grab-x-link--shell-command-to-string
                    (concat "xdotool getwindowname " chrome-window))
-                  " - Chrome")))
+                  " - Google Chrome")))
       (cons url title))))
 
 ;;;###autoload
