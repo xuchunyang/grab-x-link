@@ -1,12 +1,12 @@
 ;;; grab-x-link.el --- Grab links from X11 apps and insert into Emacs  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016  Chunyang Xu
+;; Copyright (C) 2016, 2018  Xu Chunyang
 
-;; Author: Chunyang Xu <mail@xuchunyang.me>
+;; Author: Xu Chunyang <mail@xuchunyang.me>
 ;; URL: https://github.com/xuchunyang/grab-x-link
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 ;; Keywords: hyperlink
-;; Version: 0.4.1
+;; Version: 0.5
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 ;; - xsel(1) or xclip(1) if you are running Emacs inside a terminal emulator
 ;;
 ;; Changes:
+;; - 2018-02-05 v0.5 Support Google Chrome
 ;; - 2016-12-01 v0.4 Handle case that app is not running
 ;; - 2016-12-01 v0.3 Add the command `grab-x-link'
 ;; - 2016-11-19 v0.2 Rename grab-x11-link to grab-x-link
