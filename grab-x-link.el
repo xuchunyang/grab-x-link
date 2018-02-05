@@ -100,7 +100,7 @@
           "xdotool getactivewindow"))
         (chromium-window
          (or (grab-x-link--shell-command-to-string
-              "xdotool search --class chromium-browser | tail -1")
+              "xdotool search --name ' - Chromium' | tail -1")
              (error "Can't detect Chromium Window -- is it running?"))))
     (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" chromium-window))
     (shell-command (format "xdotool windowactivate %s" emacs-window))
