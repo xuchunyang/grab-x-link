@@ -131,10 +131,34 @@
                   " - Google Chrome")))
       (cons url title))))
 
+
+(defun grab-x-link-brave ()
+  (let ((emacs-window
+         (grab-x-link--shell-command-to-string
+          "xdotool getactivewindow"))
+        (brave-window
+         (or (grab-x-link--shell-command-to-string
+              "xdotool search --name ' - brave' | tail -1")
+             (error "Can't detect brave Window -- is it running?"))))
+    (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" brave-window))
+    (shell-command (format "xdotool windowactivate %s" emacs-window))
+    (sit-for 0.2)
+    (let ((url (substring-no-properties (grab-x-link--get-clipboard)))
+          (title (grab-x-link--title-strip
+                  (grab-x-link--shell-command-to-string
+                   (concat "xdotool getwindowname " brave-window))
+                  " - brave")))
+      (cons url title))))
+
 ;;;###autoload
 (defun grab-x-link-firefox-insert-link ()
   (interactive)
   (insert (grab-x-link--build (grab-x-link-firefox))))
+
+;;;###autoload
+(defun grab-x-link-brave-insert-org-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-brave) 'org)))
 
 ;;;###autoload
 (defun grab-x-link-firefox-insert-org-link ()
@@ -189,7 +213,9 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
    (let ((apps
           '((?c . chromium)
             (?g . chrome)
-            (?f . firefox)))
+            (?f . firefox)
+            (?b . brave)
+            ))
          (link-types
           '((?p . plain)
             (?m . markdown)
@@ -206,7 +232,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
          input app link-type)
 
      (message (funcall propertize-menu
-                       "Grab link from [c]hromium [g]chrome [f]irefox:"))
+                       "Grab link from [c]hromium [g]chrome [f]irefox [b]brave:"))
      (setq input (read-char-exclusive))
      (setq app (cdr (assq input apps)))
 
@@ -219,7 +245,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
   (unless link-type
     (setq link-type 'plain))
 
-  (unless (and (memq app '(chromium chrome firefox))
+  (unless (and (memq app '(chromium chrome firefox brave))
                (memq link-type '(plain org markdown)))
     (error "Unknown app %s or link-type %s" app link-type))
 
