@@ -1,45 +1,5 @@
-;;; grab-x-link.el --- Grab links from X11 apps and insert into Emacs  -*- lexical-binding: t; -*-
-
-;; Copyright (C) 2016, 2018  Xu Chunyang
-
-;; Author: Xu Chunyang <mail@xuchunyang.me>
-;; URL: https://github.com/xuchunyang/grab-x-link
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Keywords: hyperlink
-;; Version: 0.5
-
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-;;; Commentary:
-
-;; Grab link and title from Firefox and Chromium, insert into Emacs buffer as
-;; plain, markdown or org link.
-;;
-;; To use, invoke `M-x grab-x-link' and other commands provided by this package.
-;;
-;; Prerequisite:
-;; - xdotool(1)
-;; - xsel(1) or xclip(1) if you are running Emacs inside a terminal emulator
-;;
-;; Changes:
-;; - 2018-02-05 v0.5 Support Google Chrome
-;; - 2016-12-01 v0.4 Handle case that app is not running
-;; - 2016-12-01 v0.3 Add the command `grab-x-link'
-;; - 2016-11-19 v0.2 Rename grab-x11-link to grab-x-link
-;; - 2016-11-19 v0.1 Support Emacs running inside terminal emulator
-
-;;; Code:
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with <open> and enter text in its buffer.
 
 (require 'cl-lib)
 
@@ -131,6 +91,25 @@
                   " - Google Chrome")))
       (cons url title))))
 
+(defun grab-x-link-vivaldi ()
+  (let ((emacs-window
+         (grab-x-link--shell-command-to-string
+          "xdotool getactivewindow"))
+        (vivaldi-window
+         (or (grab-x-link--shell-command-to-string
+              "xdotool search --name ' - Vivaldi' | tail -1")
+             (error "Can't detect Chrome Window -- is it running?"))))
+    (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" vivaldi-window))
+    (shell-command (format "xdotool windowactivate %s" emacs-window))
+    (sit-for 0.2)
+    (let ((url (substring-no-properties (grab-x-link--get-clipboard)))
+          (title (grab-x-link--title-strip
+                  (grab-x-link--shell-command-to-string
+                   (concat "xdotool getwindowname " vivaldi-window))
+                  " - Vivaldi")))
+      (cons url title))))
+
+
 
 (defun grab-x-link-brave ()
   (let ((emacs-window
@@ -201,6 +180,22 @@
   (insert (grab-x-link--build (grab-x-link-chrome) 'markdown)))
 
 ;;;###autoload
+(defun grab-x-link-vivaldi-insert-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-vivaldi))))
+
+;;;###autoload
+(defun grab-x-link-vivaldi-insert-org-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-vivaldi) 'org)))
+
+;;;###autoload
+(defun grab-x-link-chrome-insert-markdown-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-vivaldi) 'markdown)))
+
+
+;;;###autoload
 (defun grab-x-link (app &optional link-type)
   "Prompt for an application to grab a link from.
 When done, go gtab the link, and insert it at point.
@@ -215,6 +210,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
             (?g . chrome)
             (?f . firefox)
             (?b . brave)
+	    (?v . vivaldi)
             ))
          (link-types
           '((?p . plain)
@@ -232,7 +228,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
          input app link-type)
 
      (message (funcall propertize-menu
-                       "Grab link from [c]hromium [g]chrome [f]irefox [b]brave:"))
+                       "Grab link from [c]hromium [g]chrome [f]irefox [v]vivaldi [b]brave:"))
      (setq input (read-char-exclusive))
      (setq app (cdr (assq input apps)))
 
@@ -245,7 +241,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
   (unless link-type
     (setq link-type 'plain))
 
-  (unless (and (memq app '(chromium chrome firefox brave))
+  (unless (and (memq app '(chromium chrome firefox brave vivaldi))
                (memq link-type '(plain org markdown)))
     (error "Unknown app %s or link-type %s" app link-type))
 
@@ -257,3 +253,6 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
 
 (provide 'grab-x-link)
 ;;; grab-x-link.el ends here
+
+
+
