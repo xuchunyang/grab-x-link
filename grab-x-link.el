@@ -33,6 +33,7 @@
 ;; - xsel(1) or xclip(1) if you are running Emacs inside a terminal emulator
 ;;
 ;; Changes:
+;; - 2024-12-24 v0.6 Support Vivaldi
 ;; - 2018-02-05 v0.5 Support Google Chrome
 ;; - 2016-12-01 v0.4 Handle case that app is not running
 ;; - 2016-12-01 v0.3 Add the command `grab-x-link'
@@ -40,6 +41,7 @@
 ;; - 2016-11-19 v0.1 Support Emacs running inside terminal emulator
 
 ;;; Code:
+
 
 (require 'cl-lib)
 
@@ -131,6 +133,25 @@
                   " - Google Chrome")))
       (cons url title))))
 
+(defun grab-x-link-vivaldi ()
+  (let ((emacs-window
+         (grab-x-link--shell-command-to-string
+          "xdotool getactivewindow"))
+        (vivaldi-window
+         (or (grab-x-link--shell-command-to-string
+              "xdotool search --name ' - Vivaldi' | tail -1")
+             (error "Can't detect Chrome Window -- is it running?"))))
+    (shell-command (format "xdotool windowactivate --sync %s key ctrl+l ctrl+c" vivaldi-window))
+    (shell-command (format "xdotool windowactivate %s" emacs-window))
+    (sit-for 0.2)
+    (let ((url (substring-no-properties (grab-x-link--get-clipboard)))
+          (title (grab-x-link--title-strip
+                  (grab-x-link--shell-command-to-string
+                   (concat "xdotool getwindowname " vivaldi-window))
+                  " - Vivaldi")))
+      (cons url title))))
+
+
 
 (defun grab-x-link-brave ()
   (let ((emacs-window
@@ -201,6 +222,22 @@
   (insert (grab-x-link--build (grab-x-link-chrome) 'markdown)))
 
 ;;;###autoload
+(defun grab-x-link-vivaldi-insert-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-vivaldi))))
+
+;;;###autoload
+(defun grab-x-link-vivaldi-insert-org-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-vivaldi) 'org)))
+
+;;;###autoload
+(defun grab-x-link-chrome-insert-markdown-link ()
+  (interactive)
+  (insert (grab-x-link--build (grab-x-link-vivaldi) 'markdown)))
+
+
+;;;###autoload
 (defun grab-x-link (app &optional link-type)
   "Prompt for an application to grab a link from.
 When done, go gtab the link, and insert it at point.
@@ -215,6 +252,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
             (?g . chrome)
             (?f . firefox)
             (?b . brave)
+	    (?v . vivaldi)
             ))
          (link-types
           '((?p . plain)
@@ -232,7 +270,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
          input app link-type)
 
      (message (funcall propertize-menu
-                       "Grab link from [c]hromium [g]chrome [f]irefox [b]brave:"))
+                       "Grab link from [c]hromium [g]chrome [f]irefox [v]vivaldi [b]brave:"))
      (setq input (read-char-exclusive))
      (setq app (cdr (assq input apps)))
 
@@ -245,7 +283,7 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
   (unless link-type
     (setq link-type 'plain))
 
-  (unless (and (memq app '(chromium chrome firefox brave))
+  (unless (and (memq app '(chromium chrome firefox brave vivaldi))
                (memq link-type '(plain org markdown)))
     (error "Unknown app %s or link-type %s" app link-type))
 
@@ -257,3 +295,6 @@ markdown org), if LINK-TYPE is omitted or nil, plain link will be used."
 
 (provide 'grab-x-link)
 ;;; grab-x-link.el ends here
+
+
+
