@@ -1,5 +1,47 @@
-;; This buffer is for text that is not saved, and for Lisp evaluation.
-;; To create a file, visit it with <open> and enter text in its buffer.
+;;; grab-x-link.el --- Grab links from X11 apps and insert into Emacs  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2016, 2018  Xu Chunyang
+
+;; Author: Xu Chunyang <mail@xuchunyang.me>
+;; URL: https://github.com/xuchunyang/grab-x-link
+;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Keywords: hyperlink
+;; Version: 0.5
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Grab link and title from Firefox and Chromium, insert into Emacs buffer as
+;; plain, markdown or org link.
+;;
+;; To use, invoke `M-x grab-x-link' and other commands provided by this package.
+;;
+;; Prerequisite:
+;; - xdotool(1)
+;; - xsel(1) or xclip(1) if you are running Emacs inside a terminal emulator
+;;
+;; Changes:
+;; - 2024-12-24 v0.6 Support Vivaldi
+;; - 2018-02-05 v0.5 Support Google Chrome
+;; - 2016-12-01 v0.4 Handle case that app is not running
+;; - 2016-12-01 v0.3 Add the command `grab-x-link'
+;; - 2016-11-19 v0.2 Rename grab-x11-link to grab-x-link
+;; - 2016-11-19 v0.1 Support Emacs running inside terminal emulator
+
+;;; Code:
+
 
 (require 'cl-lib)
 
